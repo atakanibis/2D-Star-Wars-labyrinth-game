@@ -1,0 +1,759 @@
+////////////////////////BadPlayer.h//////////////////////////
+
+#pragma once
+#include "Player.h"
+class BadPlayer : public Player
+{
+public:
+	BadPlayer(Cordinate pos, ::Map map);
+	virtual bool DecreaseHealth();
+private:
+
+};
+
+/////////////////////////Kylo.h//////////////////////////////
+
+#pragma once
+#include "BadPlayer.h"
+class Kylo : public BadPlayer
+{
+public:
+	Kylo(Cordinate pos, ::Map map);
+	bool DecreaseHealth();
+	vector<Cordinate> ShortestPath(Cordinate destination);
+private:
+
+};
+
+/////////////////////Trooper.h////////////////////////////////
+
+#pragma once
+#include "BadPlayer.h"
+class Trooper : public BadPlayer
+{
+public:
+	Trooper(Cordinate pos, ::Map map);
+	~Trooper();
+	bool DecreaseHealth();
+private:
+
+};
+
+///////////////////////Vader.h////////////////////////////////
+#pragma once
+#include "BadPlayer.h"
+class Vader : public BadPlayer
+{
+public:
+	Vader(Cordinate pos, ::Map map);
+	~Vader();
+	bool DecreaseHealth();
+private:
+
+};
+
+//////////////////////GoodPlayer.h//////////////////////////
+
+#pragma once
+#include "Player.h"
+class GoodPlayer:public Player
+{
+protected:
+	float LeftHealth;
+public:
+	GoodPlayer(Cordinate pos, ::Map map);
+	virtual bool DecreaseHealth();
+};
+
+//////////////////////////Luke.h/////////////////////////
+
+#pragma once
+#include "GoodPlayer.h"
+class Luke : public GoodPlayer
+{
+public:
+	Luke(Cordinate pos, ::Map map);
+	~Luke();
+	bool DecreaseHealth();
+private:
+};
+
+//////////////////////////Yoda.h//////////////////////////
+
+#pragma once
+#include "GoodPlayer.h"
+class Yoda : public GoodPlayer
+{
+public:
+	Yoda(Cordinate pos, ::Map map);
+	~Yoda();
+	bool DecreaseHealth();
+private:
+
+};
+
+//////////////////////Cordinate.h//////////////////////
+
+#pragma once
+class Cordinate
+{
+public:
+	Cordinate();
+	Cordinate(int row, int clmn);
+	int row;
+	int column;
+private:
+
+};
+
+////////////////////Display.h///////////////////////////
+
+#pragma once
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_image.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_native_dialog.h>
+#include <vector>
+#include "Map.h"
+#include "Player.h"
+using namespace std;
+class Display {
+	private:
+		enum MYKEYS {
+			KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT
+		};
+		ALLEGRO_DISPLAY* screen;
+		Map* Map;
+		Player* GoodPlayer;
+		vector<Player*> BadPlayers;
+		//Padding from all sides 80 px;
+		int padding = 20;
+		//An box is 40x40
+		int boxSize = 40;
+	public:
+		Display(::Map* mapData, Player* goodPlayer, vector<Player*> badPlayers);
+		void ListenEvents();
+		void DrawMap();
+		~Display();
+		bool Control();
+		void DrawPath(vector<Cordinate> cordinates);
+};
+
+
+///////////////////Map.h////////////////////////////////////
+
+#pragma once
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <iostream>
+#include "Cordinate.h"
+#include <algorithm>
+#include <map>
+#include <queue>
+using namespace std;
+class Map
+{
+	private:
+		vector<string> SplitString(string str, char byChar);
+		struct queueNode {
+			Cordinate pt;
+			int dist;
+			vector<Cordinate> road;
+		};
+	public:
+		vector<vector<bool>> data;
+		vector<Cordinate> ShortestPath(Cordinate start, Cordinate destination);
+		std::map<char, Cordinate> Doors;
+		std::map<string, char> BadCharacterInfos;
+		bool AnyWallAt(int x, int y);
+		Map();
+};
+
+//////////////////////Player.h///////////////////////////
+
+#pragma once
+#include <string>
+#include "Cordinate.h"
+#include "Map.h"
+using namespace std;
+class Player
+{
+protected:
+	string Image;
+	bool IsGood;
+	Map Map;
+private:
+	int MovementSpeed = 1;
+	Cordinate Position;
+	string Name;
+public:
+	Cordinate StartPosition;
+	virtual vector<Cordinate> ShortestPath(Cordinate destination);
+	vector<Cordinate> Path;
+	void setPosition(int row, int colunm);
+	virtual void moveUp();
+	virtual void moveLeft();
+	virtual void moveRight();
+	virtual void moveDown();
+	virtual bool DecreaseHealth();
+	Cordinate currentCordinate() {
+		return Position;
+	}
+	string ImagePath();
+	Player(Cordinate pos, ::Map map);
+};
+
+///////////////////////BadPlayer.cpp////////////////////////////
+
+#include "BadPlayer.h"
+BadPlayer::BadPlayer(Cordinate pos, ::Map map) : Player(pos, map) {
+
+}
+
+bool BadPlayer::DecreaseHealth()
+{
+	return false;
+}
+
+/////////////////////////Kylo.cpp/////////////////////////////
+
+#include "Kylo.h"
+Kylo::Kylo(Cordinate pos, ::Map map) : BadPlayer(pos, map) {
+	this->Image = "kylo.png";
+}
+bool Kylo::DecreaseHealth()
+{
+	return false;
+}
+vector<Cordinate> Kylo::ShortestPath(Cordinate destination) {
+	vector<Cordinate> x;
+	for (int i = 0; i < 2; i++)
+	{
+		x = Player::ShortestPath(destination);
+	}
+	return x;
+}
+
+////////////////////////Trooper.cpp/////////////////////////
+
+#include "Trooper.h"
+Trooper::Trooper(Cordinate pos, ::Map map) : BadPlayer(pos, map) {
+	this->Image = "trooper.png";
+}
+bool Trooper::DecreaseHealth()
+{
+	return false;
+}
+
+/////////////////////////Vader.cpp//////////////////////////
+
+#include "Vader.h"
+Vader::Vader(Cordinate pos, ::Map map) : BadPlayer(pos, map) {
+	this->Image = "vader.png";
+	this->Map.data = vector<vector<bool>>(this->Map.data.size(), vector<bool>(this->Map.data.at(0).size(), false));
+}
+
+bool Vader::DecreaseHealth()
+{
+	return false;
+}
+
+//////////////////////GoodPlayer.cpp////////////////////////
+
+#include "GoodPlayer.h"
+GoodPlayer::GoodPlayer(Cordinate pos, ::Map map) : Player(pos, map) {
+	this->LeftHealth = 3;
+}
+
+bool GoodPlayer::DecreaseHealth()
+{
+	return false;
+}
+
+///////////////////////////Luke.cpp/////////////////////////////
+
+#include "Luke.h"
+Luke::Luke(Cordinate pos, ::Map map) : GoodPlayer(pos, map) {
+	this->Image = "luke.png";
+}
+bool Luke::DecreaseHealth() {
+	this->LeftHealth -= 1;
+	cout << "Left Health: " << this->LeftHealth << endl;
+	if (this->LeftHealth == 0) return 1;
+	return 0;
+}
+
+/////////////////////////Yoda.cpp//////////////////////////////
+
+#include "Yoda.h"
+Yoda::Yoda(Cordinate pos, ::Map map) : GoodPlayer(pos, map) {
+	this->Image = "yoda.png";
+}
+bool Yoda::DecreaseHealth() {
+	this->LeftHealth -= 0.5;
+	cout << "Left Health: " << this->LeftHealth << endl;
+	if (this->LeftHealth == 0) return 1;
+	return 0;
+}
+
+///////////////////////Cordinate.cpp///////////////////////////
+
+#include "Cordinate.h"
+Cordinate::Cordinate()
+{
+}
+Cordinate::Cordinate(int row, int clmn)
+{
+	this->row = row;
+	this->column = clmn;
+}
+
+///////////////////////Display.cpp/////////////////////////////
+
+#include "Display.h"
+#include "Player.h"
+Display::Display(::Map* mapData, Player* goodPlayer, vector<Player*> badPlayers) {
+	this->GoodPlayer = goodPlayer;
+	this->BadPlayers = badPlayers;
+	this->Map = mapData;
+	al_init();
+	al_init_primitives_addon();
+	al_init_image_addon();
+	al_init_font_addon();
+	al_init_ttf_addon();
+	int width = padding * 2 + Map->data.at(0).size() * boxSize;
+	int height = padding * 2 + Map->data.size() * boxSize;
+	this->screen = al_create_display(width, height);
+	al_clear_to_color(al_map_rgb(255, 255, 255));
+	al_flip_display();
+	this->DrawMap();
+	this->ListenEvents();
+}
+void Display::ListenEvents() {
+	ALLEGRO_DISPLAY *display = this->screen;
+	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
+	ALLEGRO_TIMER *timer = NULL;
+	bool key[4] = { false, false, false, false };
+	bool redraw = true;
+	bool doexit = false;
+	if (!al_install_keyboard()) {
+		fprintf(stderr, "failed to initialize the keyboard!\n");
+		return;
+	}
+	timer = al_create_timer(1.0 / 10);
+	if (!timer) {
+		fprintf(stderr, "failed to create timer!\n");
+		return;
+	}
+	event_queue = al_create_event_queue();
+	if (!event_queue) {
+		fprintf(stderr, "failed to create event_queue!\n");
+		al_destroy_display(display);
+		al_destroy_timer(timer);
+		return;
+	}
+	al_register_event_source(event_queue, al_get_display_event_source(display));
+	al_register_event_source(event_queue, al_get_timer_event_source(timer));
+	al_register_event_source(event_queue, al_get_keyboard_event_source());
+	al_flip_display();
+	al_start_timer(timer);
+	while (!doexit)
+	{
+		ALLEGRO_EVENT ev;
+		al_wait_for_event(event_queue, &ev);
+		vector<vector<Cordinate>> paths;
+		if (ev.type == ALLEGRO_EVENT_TIMER) {
+			if (key[KEY_UP]) {
+				this->GoodPlayer->moveUp();
+				for (auto& badPlayer : this->BadPlayers) {
+					badPlayer->ShortestPath(this->GoodPlayer->currentCordinate());
+				}
+				Control();
+			}
+			if (key[KEY_DOWN]) {
+				this->GoodPlayer->moveDown();
+				for (auto& badPlayer : this->BadPlayers) {
+					badPlayer->ShortestPath(this->GoodPlayer->currentCordinate());
+				}
+				Control();
+			}
+			if (key[KEY_LEFT]) {
+				this->GoodPlayer->moveLeft();
+				for (auto& badPlayer : this->BadPlayers) {
+					badPlayer->ShortestPath(this->GoodPlayer->currentCordinate());
+				}
+				Control();
+			}
+			if (key[KEY_RIGHT]) {
+				this->GoodPlayer->moveRight();
+				for (auto& badPlayer : this->BadPlayers) {
+					badPlayer->ShortestPath(this->GoodPlayer->currentCordinate());;
+				}
+				Control();
+			}
+			redraw = true;
+		}
+		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+			break;
+		}
+		else if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
+			switch (ev.keyboard.keycode) {
+			case ALLEGRO_KEY_UP:
+				key[KEY_UP] = true;
+				break;
+
+			case ALLEGRO_KEY_DOWN:
+				key[KEY_DOWN] = true;
+				break;
+
+			case ALLEGRO_KEY_LEFT:
+				key[KEY_LEFT] = true;
+				break;
+
+			case ALLEGRO_KEY_RIGHT:
+				key[KEY_RIGHT] = true;
+				break;
+			}
+		}
+		else if (ev.type == ALLEGRO_EVENT_KEY_UP) {
+			switch (ev.keyboard.keycode) {
+			case ALLEGRO_KEY_UP:
+				key[KEY_UP] = false;
+				break;
+			case ALLEGRO_KEY_DOWN:
+				key[KEY_DOWN] = false;
+				break;
+			case ALLEGRO_KEY_LEFT:
+				key[KEY_LEFT] = false;
+				break;
+			case ALLEGRO_KEY_RIGHT:
+				key[KEY_RIGHT] = false;
+				break;
+			case ALLEGRO_KEY_ESCAPE:
+				doexit = true;
+				break;
+			}
+		}
+		if (redraw && al_is_event_queue_empty(event_queue)) {
+			redraw = false;
+			al_clear_to_color(al_map_rgb(255, 255, 255));
+			this->DrawMap();
+		}
+	}
+}
+void Display::DrawMap() {
+	ALLEGRO_FONT *sec = al_load_ttf_font("comic.ttf", 25, 0);
+	ALLEGRO_BITMAP *goodChar = al_load_bitmap(this->GoodPlayer->ImagePath().c_str());
+	int currentRow = 0;
+	for (auto &row : this->Map->data) {
+		int currentColunm = 0;
+		for (auto isWall : row) {
+			int leftUpperX = padding + boxSize * currentColunm;
+			int leftUpperY = padding + boxSize * currentRow;
+			int rightDownX = leftUpperX + boxSize;
+			int rightDownY = leftUpperY + boxSize;
+			if (isWall == false) {
+				al_draw_rectangle(leftUpperX, leftUpperY, rightDownX, rightDownY, al_map_rgb(25, 24, 25), 1);
+				if (currentColunm == 13 && currentRow == 9) {
+					al_draw_filled_rectangle(leftUpperX, leftUpperY, rightDownX, rightDownY, al_map_rgb(204, 204, 0));
+				}
+				for (auto it = this->Map->Doors.begin(); it != this->Map->Doors.end(); ++it)
+					if (it->second.row == currentRow && it->second.column == currentColunm) {
+						al_draw_filled_rectangle(leftUpperX, leftUpperY, rightDownX, rightDownY, al_map_rgb(0, 0, 204));
+						al_draw_text(sec, al_map_rgb(255, 255, 255), (leftUpperX + rightDownX) / 2, leftUpperY, ALLEGRO_ALIGN_CENTRE, &it->first);
+					}
+			}
+			else al_draw_filled_rectangle(leftUpperX, leftUpperY, rightDownX, rightDownY, al_map_rgb(224, 102, 255));
+			currentColunm++;
+		}
+		currentRow++;
+	}
+	for (auto& badPlayer : this->BadPlayers) {
+		this->DrawPath(badPlayer->Path);
+	}
+	ALLEGRO_BITMAP  *cup = NULL;
+	cup = al_load_bitmap("cup.jpg");
+	al_draw_bitmap(cup, 540, 380, 0);
+	Cordinate goodPlayerCordinate = this->GoodPlayer->currentCordinate();
+	int goodPlayerX = padding + boxSize * goodPlayerCordinate.column;
+	int goodPlayerY = padding + boxSize * goodPlayerCordinate.row;
+	for (auto& badPlayer : this->BadPlayers) {
+		Cordinate badPlayerPlayerCordinate = badPlayer->currentCordinate();
+		int badPlayerX = padding + boxSize * badPlayerPlayerCordinate.column;
+		int badPlayerY = padding + boxSize * badPlayerPlayerCordinate.row;
+		al_draw_filled_rectangle(badPlayerX, badPlayerY, badPlayerX + this->boxSize - 1, badPlayerY + this->boxSize - 1, al_map_rgb(255, 255, 255));
+		ALLEGRO_BITMAP *badChar = al_load_bitmap(badPlayer->ImagePath().c_str());
+		al_draw_bitmap(badChar, badPlayerX, badPlayerY, 0);
+		al_destroy_bitmap(badChar);
+	}
+	al_draw_bitmap(goodChar, goodPlayerX, goodPlayerY, 0);
+	al_flip_display();
+	al_destroy_bitmap(goodChar);
+	al_destroy_bitmap(cup);
+	al_destroy_font(sec);
+}
+
+bool Display::Control() {
+	if (this->GoodPlayer->currentCordinate().row == 9 && this->GoodPlayer->currentCordinate().column == 13) {
+		cout << "!YOU WIN!" << endl;
+		ALLEGRO_BITMAP  *win = NULL;
+		al_init_image_addon();
+		win = al_load_bitmap("win.jpg");
+		al_draw_bitmap(win, -20, -75, 0);
+		al_flip_display();
+		system("pause");
+		exit(1);
+	}
+	for (auto& player : this->BadPlayers) {
+		if (this->GoodPlayer->currentCordinate().row == player->currentCordinate().row && this->GoodPlayer->currentCordinate().column == player->currentCordinate().column) {
+			cout << "CAUGHT!" << endl;
+			if (this->GoodPlayer->DecreaseHealth()) {
+				ALLEGRO_BITMAP  *gameover = NULL;
+				al_init_image_addon();
+				gameover = al_load_bitmap("gameover.png");
+				al_draw_bitmap(gameover, -275, -100, 0);
+				al_flip_display();
+				system("pause");
+				exit(1);
+			}
+			else {
+				this->GoodPlayer->setPosition(this->GoodPlayer->StartPosition.row, this->GoodPlayer->StartPosition.column);
+				for (auto& badPlayer : this->BadPlayers) {
+					badPlayer->setPosition(badPlayer->StartPosition.row, badPlayer->StartPosition.column);
+					badPlayer->Path.clear();
+				}
+			}
+		}
+	}
+	return 0;
+}
+void Display::DrawPath(vector<Cordinate> cordinates) {
+	int i = 0;
+	for (auto& cordinate : cordinates) {
+		if (i == 0) {
+			i++;
+			continue;
+		}
+		int leftUpperX = padding + boxSize * cordinate.column;
+		int leftUpperY = padding + boxSize * cordinate.row;
+		int rightDownX = leftUpperX + boxSize;
+		int rightDownY = leftUpperY + boxSize;
+		al_draw_filled_rectangle(leftUpperX, leftUpperY, rightDownX, rightDownY, al_map_rgb(255, 0, 0));
+	}
+}
+Display::~Display() {
+	al_destroy_display(screen);
+}
+
+/////////////////////////////Map.cpp///////////////////////////////
+#include "Map.h"
+Map::Map() {
+	ifstream file("map.txt");
+	if (file.is_open()) {
+		string line;
+		int currentRow = 0;
+		char CurrentDoor = 'A';
+		char Badcharassembler = 'A';
+		bool readingCharacters = true;
+		while (getline(file, line)) {
+			if (line.empty()) {
+				readingCharacters = false;
+				continue;
+			}
+			if (!readingCharacters) {
+
+				vector<bool> thisRow;
+				int currentColunm = 0;
+				vector<string> splitted = SplitString(line, '\t');
+				for (auto &isWall : splitted)
+				{
+					if ((currentColunm == 0 || currentRow == 0 || currentColunm == 13 || currentRow == 10) && isWall == "1" && !(currentColunm == 13 && currentRow == 9)) {
+						this->Doors[CurrentDoor] = Cordinate(currentRow, currentColunm);
+						CurrentDoor++;
+					}
+					if (isWall == "0") thisRow.push_back(true);
+					else thisRow.push_back(false);
+					currentColunm++;
+				}
+				this->data.push_back(thisRow);
+				currentRow++;
+			}
+			else {
+				vector<string> splitbycomma = SplitString(line, ',');
+				string character = splitbycomma.at(0);
+				character = SplitString(character, ':').at(1);
+				character += Badcharassembler;
+				Badcharassembler++;
+				string door = splitbycomma.at(1);
+				door = SplitString(door, ':').at(1);
+				std::transform(character.begin(), character.end(), character.begin(), ::tolower);
+				std::transform(door.begin(), door.end(), door.begin(), ::toupper);
+				this->BadCharacterInfos[character] = door.at(0);
+			}
+		}
+		file.close();
+	}
+}
+
+vector<string> Map::SplitString(string str, char byChar)
+{
+	stringstream strtostream(str);
+	string segment;
+	vector<string> seglist;
+	while (getline(strtostream, segment, byChar))
+	{
+		if (segment.empty()) continue;
+		seglist.push_back(segment);
+	}
+	return seglist;
+}
+
+vector<Cordinate> Map::ShortestPath(Cordinate start, Cordinate destination)
+{
+	int rowNum[] = { -1, 0, 0, 1 };
+	int colNum[] = { 0, -1, 1, 0 };
+	//if (!this->data[start.row][start.column] || !this->data[destination.row][destination.column])	throw "Cant access.";
+	vector<vector<bool>> visited(this->data.size(), vector<bool>(this->data.at(0).size(), false));
+	visited[start.row][start.column] = true;
+	queue<queueNode> q;
+	queueNode s = { start, 0 };
+	q.push(s);
+	while (!q.empty())
+	{
+		queueNode curr = q.front();
+		Cordinate pt = curr.pt;
+		if (pt.row == destination.row && pt.column == destination.column) {
+			curr.road.push_back(curr.pt);
+			return curr.road;
+		}
+		q.pop();
+		for (int i = 0; i < 4; i++)
+		{
+			int row = pt.row + rowNum[i];
+			int col = pt.column + colNum[i];
+			if ((row >= 0) && (row < this->data.size()) && (col >= 0) && (col < this->data.at(0).size()) && !this->data[row][col] && !visited[row][col]) {
+				visited[row][col] = true;
+				queueNode Adjcell = { {row, col},
+									  curr.dist + 1 };
+				Adjcell.road = curr.road;
+				Adjcell.road.push_back(curr.pt);
+				q.push(Adjcell);
+			}
+		}
+	}
+	throw "Cant access.";
+}
+
+bool Map::AnyWallAt(int x, int y) {
+	if (x == 9 && y == 13) return false;
+	if (y == 0 || y == this->data.at(0).size() - 1 || x == 0 || x == this->data.size() - 1) return true;
+	if (this->data.at(x).at(y) == true) return true;
+	else return false;
+}
+
+////////////////////////Player.cpp/////////////////////////////
+
+#include "Player.h"
+Player::Player(Cordinate pos, ::Map map) {
+	this->Position = pos;
+	this->StartPosition = pos;
+	this->Map = map;
+}
+vector<Cordinate> Player::ShortestPath(Cordinate destination) {
+	vector<Cordinate> path = this->Map.ShortestPath(this->currentCordinate(), destination);
+	if(path.size() >=  2) this->setPosition(path.at(1).row, path.at(1).column);
+	else if (path.size() == 1) this->setPosition(path.at(0).row, path.at(0).column);
+	this->Path = path;
+	return path;
+}
+
+string Player::ImagePath() {
+	return this->Image;
+}
+
+void Player::setPosition(int row, int colunm)
+{
+	this->Position.row = row;
+	this->Position.column = colunm;
+}
+
+void Player::moveUp() {
+	if(!this->Map.AnyWallAt(this->Position.row - 1, this->Position.column))
+		this->Position.row -= this->MovementSpeed;
+}
+
+void Player::moveDown() {
+	if (!this->Map.AnyWallAt(this->Position.row + 1, this->Position.column))
+		this->Position.row += this->MovementSpeed;
+}
+
+bool Player::DecreaseHealth()
+{
+	return false;
+}
+
+void Player::moveLeft() {
+	if (!this->Map.AnyWallAt(this->Position.row, this->Position.column - 1))
+		this->Position.column -= this->MovementSpeed;
+}
+
+void Player::moveRight() {
+	if (!this->Map.AnyWallAt(this->Position.row, this->Position.column + 1))
+		this->Position.column += this->MovementSpeed;
+}
+
+////////////////////////////Source.cpp////////////////////////////////////
+
+#include <iostream>
+#include "Display.h"
+#include "Map.h"
+#include "Luke.h"
+#include "Yoda.h"
+#include "Trooper.h"
+#include "Kylo.h"
+#include "Vader.h"
+using namespace std;
+
+void main() {
+	int selection;
+	cout << "Karakter seciniz: " << endl;
+	cout << "1 -> Luke Skywalker" << endl;
+	cout << "2 -> MasterYoda" << endl;
+	cin >> selection;
+	Map* labyrinth = new Map();
+	Cordinate start(labyrinth->data.size()/2, labyrinth->data.at(0).size() / 2 - 1);
+	Player* GoodPlayer;
+	vector<Player*> BadPlayers;
+	if (selection == 2) {
+		Yoda* master = new Yoda(start, *labyrinth);
+		GoodPlayer = master;
+	}
+	else {
+		Luke* skywalker = new Luke(start, *labyrinth);
+		GoodPlayer = skywalker;
+	}
+	for (auto& character : labyrinth->BadCharacterInfos)
+	{
+		Cordinate badStart = labyrinth->Doors.at(character.second);
+		string name = character.first;
+		name = name.substr(0, name.size() - 1);
+		if (name == "stormtrooper") {
+			Trooper* trooper = new Trooper(badStart, *labyrinth);
+			BadPlayers.push_back(trooper);
+		}
+		else if (name == "kyloren") {
+			Kylo* kylo = new Kylo(badStart, *labyrinth);
+			BadPlayers.push_back(kylo);
+		}
+		else if (name == "darthvader") {
+			Vader* vader = new Vader(badStart, *labyrinth);
+			BadPlayers.push_back(vader);
+		}
+	}
+	Display* screen = new Display(labyrinth, GoodPlayer, BadPlayers);
+}
+
